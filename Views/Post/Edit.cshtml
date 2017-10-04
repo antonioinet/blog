@@ -1,0 +1,42 @@
+@using System.Collections.Generic
+@using System.Linq
+@using Microsoft.AspNetCore.Http
+@using Blog.Models.PostViewModels
+@model PostNewViewModel
+
+<div class="row">
+    <form method="post">        
+        <h1 class="mt-4">Update your's blog post</h1>
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <label asp-for="Url">Your vanity URL</label>
+        <div class="input-group">
+            <span class="input-group-addon" id="basic-addon3">@ViewData["HostUrl"]/Post/</span>
+            <input asp-for="Url" type="text" class="form-control" aria-describedby="basic-addon3"/>
+        </div>
+        <label asp-for="ImageUrl">Post image URL</label>
+        <div class="input-group">
+            <span class="input-group-addon" id="basic-addon3">@ViewData["HostUrl"]/Image/</span>
+            <input asp-for="ImageUrl" type="text" class="form-control" aria-describedby="basic-addon3"/>
+        </div>        
+        <label asp-for="Title">Title</label>        
+        <div class="input-group">
+            <input asp-for="Title" type="text" class="form-control"/>
+            <span asp-validation-for="Title" class="text-danger"></span>            
+        </div>
+        <label asp-for="Lead">Lead</label>
+        <div class="input-group">
+            <input asp-for="Lead" type="text" class="form-control"/>
+            <span asp-validation-for="Lead" class="text-danger"></span>
+        </div>
+        <label asp-for="Content">Write content here</label>
+        <div class="input-group">
+            <textarea asp-for="Content" class="form-control" rows="3"></textarea>
+            <span asp-validation-for="Content" class="text-danger"></span>            
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
