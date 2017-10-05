@@ -6,21 +6,64 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Blog.Models;
 using Blog.Data;
-using Blog.Models.BlogViewModels;
+using Blog.Models.PostViewModels;
+using Microsoft.AspNetCore.Identity;
 
 namespace Blog.Controllers
 {
     public class HomeController : Controller
     {
         private BlogDbContext _db;
-        public HomeController(BlogDbContext db)
+        private UserManager<ApplicationUser> _userManager;
+
+        private static readonly int postOnPage = 5;
+        public HomeController(
+            UserManager<ApplicationUser> userManager,
+            BlogDbContext db)
         {
             _db = db;
+            _userManager = userManager;
         }
-        public IActionResult Index()
+        public async Task<IActionResult> Index(int id)
         {
-            List<Post> posts = _db.Posts.ToList();
-            return View(posts);
+            id = id <= 0 ? 1 : id;
+            id--;
+            
+            List<Post> postsInDb = 
+                (from p in _db.Posts
+                orderby p.Created descending
+                select p
+                )
+                .Skip(id * postOnPage)
+                .Take(postOnPage+1)
+                .ToList();
+            List<PostViewModel> posts = new List<PostViewModel>();
+            foreach(var p in postsInDb.Take(postOnPage))
+            {
+                var user = await _userManager.FindByNameAsync(p.AuthorId);
+
+                posts.Add(new PostViewModel()
+                {
+                    PostId=p.PostId,
+                    AuthorId=p.AuthorId,
+                    AuthorName=user?.AuthorName,
+                    Created=p.Created,
+                    Content=p.Content,
+                    ImageUrl=p.ImageUrl,
+                    Lead=p.Lead,
+                    Title=p.Title,
+                    Url=p.Url
+                });
+            }
+
+            id ++;
+            PostListViewModel model = new PostListViewModel()
+            {
+                Posts = posts,
+                OlderIndex = id<2 ? null : (int?) id-1,
+                NewerIndex = postsInDb.Count > postOnPage ? (int?) id+1 : null
+            };
+            return View(model);
         }
 
         public IActionResult About()

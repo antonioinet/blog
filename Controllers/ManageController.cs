@@ -57,6 +57,7 @@ namespace Blog.Controllers
             var model = new IndexViewModel
             {
                 Username = user.UserName,
+                AuthorName = user.AuthorName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
                 IsEmailConfirmed = user.EmailConfirmed,
@@ -99,6 +100,13 @@ namespace Blog.Controllers
                 {
                     throw new ApplicationException($"Unexpected error occurred setting phone number for user with ID '{user.Id}'.");
                 }
+            }
+
+            user.AuthorName = model.AuthorName;
+            var updateUser = await _userManager.UpdateAsync(user);
+            if (!updateUser.Succeeded)
+            {
+                throw new ApplicationException($"Unexpected error occurred when updated user with ID '{user.Id}'.");
             }
 
             StatusMessage = "Your profile has been updated";

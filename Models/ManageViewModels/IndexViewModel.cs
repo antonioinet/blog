@@ -10,6 +10,9 @@ namespace Blog.Models.ManageViewModels
     {
         public string Username { get; set; }
 
+        [Display(Name="Your name")]
+        public string AuthorName { get; set; }
+
         public bool IsEmailConfirmed { get; set; }
 
         [Required]

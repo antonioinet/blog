@@ -21,6 +21,7 @@ namespace Blog.Controllers
     public class PostController:Controller
     {
         private BlogDbContext _db;
+        private UserManager<ApplicationUser> _userManager;
         private HtmlSanitizer _sanitizer = new HtmlSanitizer(
             new List<string>(){"p","h4","blockquote","footer"},
             new List<string>(),
@@ -28,8 +29,11 @@ namespace Blog.Controllers
             new List<string>(),
             new List<string>()            
             );
-        public PostController(BlogDbContext db)
+        public PostController(
+            UserManager<ApplicationUser> userManager,
+            BlogDbContext db)
         {
+            _userManager = userManager;
             _db = db;
         }
 
@@ -43,15 +47,27 @@ namespace Blog.Controllers
         [Route("[controller]/[action]/{id}")]
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult Index(int id)
+        public async Task<IActionResult> Index(int id)
         {
-            Post post = (from p in _db.Posts
-                        where p.PostId == id
-                        select p).FirstOrDefault();
-            if (post == null)
+            Post p = (from post in _db.Posts
+                        where post.PostId == id
+                        select post).FirstOrDefault();
+            if (p == null)
                 return new NotFoundResult();
-
-            return View(post);
+            
+            var user = await _userManager.FindByNameAsync(p.AuthorId);
+            return View(new PostViewModel()
+            {
+                PostId=p.PostId,
+                AuthorId=p.AuthorId,
+                AuthorName=user?.AuthorName,
+                Created=p.Created,
+                Content=p.Content,
+                ImageUrl=p.ImageUrl,
+                Lead=p.Lead,
+                Title=p.Title,
+                Url=p.Url
+            });
         }
 
         [Route("[controller]/[action]/{id}")]
@@ -115,7 +131,7 @@ namespace Blog.Controllers
             }
             Post post = new Post()
             {
-                AuthorId = this.User.FindFirstValue(ClaimTypes.Name),
+                AuthorId = this.User.FindFirstValue(ClaimTypes.NameIdentifier),
                 Url = model.Url,
                 ImageUrl = model.ImageUrl,
                 Created = DateTime.UtcNow,
