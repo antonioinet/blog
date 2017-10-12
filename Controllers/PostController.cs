@@ -43,9 +43,9 @@ namespace Blog.Controllers
             return _sanitizer.Sanitize(content);
         }
 
+        [HttpGet]
         [Route("[controller]/{id}")]
         [Route("[controller]/[action]/{id}")]
-        [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> Index(int id)
         {
@@ -110,7 +110,7 @@ namespace Blog.Controllers
             post.Title = model.Title;            
             post.Content = sanitize(model.Content);
             await _db.SaveChangesAsync();
-            return RedirectToAction(nameof(Index),post.PostId);
+            return RedirectToAction(nameof(Index), new {id = post.PostId});
         }
         
         [Route("[controller]/[action]")]
@@ -141,7 +141,7 @@ namespace Blog.Controllers
             };
             _db.Posts.Add(post);
             await _db.SaveChangesAsync();
-            return RedirectToAction(nameof(Index), post.PostId);
+            return RedirectToAction(nameof(Index), new {id = post.PostId});
         }
 
     }
