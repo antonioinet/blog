@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Blog.Data;
 using Blog.Models;
+using Blog.Models.BlogViewModels;
 using Blog.Models.PostViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -71,5 +72,33 @@ namespace Blog.Controllers
             };
             return View(model);
         }
+
+        [Route("[controller]/[action]")]
+        [HttpGet]
+        public IActionResult New()
+        {
+            ViewData["HostUrl"] = $"{this.Request.Scheme}://{this.Request.Host}";
+            return View();
+        }
+
+        [Route("[controller]/[action]")]
+        [HttpPost]
+        public async Task<IActionResult> New(BlogNewViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            Blog.Models.Blog blog = new Blog.Models.Blog()
+            {
+                Url = model.Url,
+                Name = model.Name,
+                Secondary = model.Secondary
+            };
+            _db.Blogs.Add(blog);
+            await _db.SaveChangesAsync();
+            return RedirectToAction(nameof(Index), new {id = blog.BlogId});
+        }
+
     }
 }

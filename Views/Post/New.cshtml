@@ -6,8 +6,18 @@
 
 <div class="row">
     <form method="post">        
-        <h1 class="mt-4">Create new blog post</h1>
+        <h1 class="mt-4">Create new post</h1>
         <div asp-validation-summary="All" class="text-danger"></div>
+        <div class="form-group">
+            <label for="blogSelect">Select blog for posting</label>
+            <select class="form-control" id="blogSelect">
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+            </select>
+        </div>
         <label asp-for="Url">Your vanity URL</label>
         <div class="input-group">
             <span class="input-group-addon" id="basic-addon3">@ViewData["HostUrl"]/Post/</span>
