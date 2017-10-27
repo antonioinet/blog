@@ -1,0 +1,18 @@
+@using Microsoft.AspNetCore.Http
+@using Blog.Models.ImageViewModels
+@model ImageUploadViewModel
+
+<form method="post" enctype="multipart/form-data" asp-controller="Image" asp-action="Upload">
+    <div class="form-group">
+        <div class="col-md-10">
+            <p>Your Image url</p>
+            <input asp-for="Url" type="text" />
+        </div>
+        <div class="col-md-10">
+            <p>Upload one file using this form</p>
+            <input name="Image"  accept="image/jpeg,image/png" type="file" />
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Upload</button>
+    
+</form>

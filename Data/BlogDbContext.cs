@@ -15,5 +15,15 @@ namespace Blog.Data
         public DbSet<Post> Posts { get; set; }
         public DbSet<Image> Images { get; set; }                
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Post>()
+                .HasIndex(p => p.Url);
+            modelBuilder.Entity<Blog.Models.Blog>()
+                .HasIndex(b => b.Url);
+            modelBuilder.Entity<Image>()
+                .HasIndex(i => i.Url)
+                .IsUnique();
+        }
     }
 }

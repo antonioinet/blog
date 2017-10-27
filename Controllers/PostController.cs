@@ -1,9 +1,6 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Blog.Models.PostViewModels;
 using System.Threading.Tasks;
 using System.Linq;
@@ -16,7 +13,7 @@ using System.Collections.Generic;
 
 namespace Blog.Controllers
 {
-    
+
     [Authorize]
     public class PostController:Controller
     {
@@ -44,13 +41,38 @@ namespace Blog.Controllers
         }
 
         [HttpGet]
-        [Route("[controller]/{id}")]
         [Route("[controller]/[action]/{id}")]
         [AllowAnonymous]
         public async Task<IActionResult> Index(int id)
         {
             Post p = (from post in _db.Posts
                         where post.PostId == id
+                        select post).FirstOrDefault();
+            if (p == null)
+                return new NotFoundResult();
+            
+            var user = await _userManager.FindByNameAsync(p.AuthorId);
+            return View(new PostViewModel()
+            {
+                PostId=p.PostId,
+                AuthorId=p.AuthorId,
+                AuthorName=user?.AuthorName,
+                Created=p.Created,
+                Content=p.Content,
+                ImageUrl=p.ImageUrl,
+                Lead=p.Lead,
+                Title=p.Title,
+                Url=p.Url
+            });
+        }
+
+        [HttpGet]
+        [Route("[controller]/{url}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Index(string url)
+        {
+            Post p = (from post in _db.Posts
+                        where post.Url == url
                         select post).FirstOrDefault();
             if (p == null)
                 return new NotFoundResult();
@@ -118,6 +140,7 @@ namespace Blog.Controllers
         public IActionResult New()
         {
             ViewData["HostUrl"] = $"{this.Request.Scheme}://{this.Request.Host}";
+            ViewData["BlogList"] = _db.Blogs.ToList();
             return View();
         }
 
@@ -129,9 +152,17 @@ namespace Blog.Controllers
             {
                 return View(model);
             }
+            Blog.Models.Blog blog=
+                (from b in _db.Blogs
+                where b.BlogId == model.BlogId
+                select b).FirstOrDefault();
+            if (blog == null)
+                return new NotFoundResult();
+
             Post post = new Post()
             {
-                AuthorId = this.User.FindFirstValue(ClaimTypes.NameIdentifier),
+                Blog = blog,
+                AuthorId = this.User.FindFirstValue(ClaimTypes.Name),
                 Url = model.Url,
                 ImageUrl = model.ImageUrl,
                 Created = DateTime.UtcNow,

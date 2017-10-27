@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using Blog.Models.BlogViewModels;
 using Blog.Models.PostViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Blog.Controllers
 {
@@ -24,29 +26,27 @@ namespace Blog.Controllers
             _db = db;
             _userManager = userManager;
         }
-        
-        [HttpGet()]
-        [Route("[controller]/{authorId}/{id?}")]
-        public async Task<IActionResult> Index(string authorId, int id)
+
+        private async Task<PostListViewModel> getModel(Blog.Models.Blog blog, int page)
         {
-            id = id <= 0 ? 1 : id;
-            id--;
-            
+            page = page <= 0 ? 1 : page;
+            page--;
+
             List<Post> postsInDb = 
                 (from p in _db.Posts
+                where p.Blog.BlogId == blog.BlogId
                 orderby p.Created descending
                 select p
                 )
-                .Skip(id * postOnPage)
+                .Skip(page * postOnPage)
                 .Take(postOnPage+1)
                 .ToList();
-            List<PostViewModel> posts = new List<PostViewModel>();
 
-            var user = await _userManager.FindByNameAsync(authorId);
+            List<PostViewModel> posts = new List<PostViewModel>();
 
             foreach(var p in postsInDb.Take(postOnPage))
             {
-                
+                var user = await _userManager.FindByNameAsync(p.AuthorId);
 
                 posts.Add(new PostViewModel()
                 {
@@ -62,16 +62,55 @@ namespace Blog.Controllers
                 });
             }
 
-            id ++;
+            page ++;
             PostListViewModel model = new PostListViewModel()
             {
-                PageHead = user?.AuthorName,                
+                PageHead = blog.Name,
+                SecondaryText = blog.Secondary,            
                 Posts = posts,
-                OlderIndex = id<2 ? null : (int?) id-1,
-                NewerIndex = postsInDb.Count > postOnPage ? (int?) id+1 : null
+                OlderIndex = page<2 ? null : (int?) page-1,
+                NewerIndex = postsInDb.Count > postOnPage ? (int?) page+1 : null
             };
+            return model;
+        }
+        
+        [HttpGet]
+        [Route("[controller]/[action]/{id}/{page?}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Index(int id, int page)
+        {
+
+            Blog.Models.Blog blog = 
+                (from b in _db.Blogs
+                 where b.BlogId == id
+                 select b
+                ).FirstOrDefault();
+            
+            if (blog == null)
+                return new NotFoundResult();
+
+            var model = await getModel(blog, page);
             return View(model);
         }
+
+        [HttpGet]
+        [Route("[controller]/{url}/{page?}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Index(string url, int page)
+        {
+
+            Blog.Models.Blog blog = 
+                (from b in _db.Blogs
+                 where b.Url == url
+                 select b
+                ).FirstOrDefault();
+            
+            if (blog == null)
+                return new NotFoundResult();
+
+            var model = await getModel(blog, page);
+            return View(model);
+        }        
 
         [Route("[controller]/[action]")]
         [HttpGet]
@@ -92,6 +131,7 @@ namespace Blog.Controllers
             Blog.Models.Blog blog = new Blog.Models.Blog()
             {
                 Url = model.Url,
+                OwnerId = this.User.FindFirstValue(ClaimTypes.NameIdentifier),
                 Name = model.Name,
                 Secondary = model.Secondary
             };

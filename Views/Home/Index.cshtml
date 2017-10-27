@@ -25,11 +25,18 @@
             <div class="card-body">
                 <h2 class="card-title">@post.Title</h2>
                 <p class="card-text">@post.Lead</p>
-                <a asp-controller="Post" asp-action="Index" asp-route-id=@post.PostId class="btn btn-primary">Read More &rarr;</a>
+                @if (string.IsNullOrEmpty(post.Url))
+                {
+                    <a asp-controller="Post" asp-action="Index" asp-route-id=@post.PostId class="btn btn-primary">Read More &rarr;</a>
+                }
+                else
+                {
+                    <a asp-controller="Post" asp-route-url=@post.Url class="btn btn-primary">Read More &rarr;</a>
+                }
             </div>
             <div class="card-footer text-muted">
                 Posted on @post.Created
-                <a asp-controller="Blog" asp-action=@post.AuthorId>@post.AuthorName</a>
+                <a asp-controller="Author" asp-action=@post.AuthorId>@post.AuthorName</a>
             </div>
             </div>
         }

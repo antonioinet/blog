@@ -6,6 +6,7 @@ namespace Blog.Models
     {
         public int BlogId { get; set;}
         public string Url { get; set; }
+        public string OwnerId { get; set; }
         public string Name { get; set; }
         public string Secondary { get; set; }
         public List<Post> Posts { get; set; }
