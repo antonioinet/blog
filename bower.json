@@ -5,7 +5,8 @@
     "bootstrap": "v4.0.0-beta",
     "jquery-validation": "1.14.0",
     "jquery-validation-unobtrusive": "3.2.6",
-    "tether": "^1.4.0"
+    "tether": "^1.4.0",
+    "popper.js": "^1.12.6"
   },
   "authors": [
     "Anton Poddubnyy <nomail@nomail.com>"
