@@ -9,7 +9,7 @@ http://startbootstrap.com/template-overviews/blog-post/
 
 MailGun setup
 -------------
-For mail sending i use MailGun rest api service. For using you need save domain and api key in user secrets.
+For mail sending i use MailGun rest api service. For using you need save domain and api key in user secrets:
 
 ```Shell
 dotnet user-secrets set MailgunDomain "sandboxxxxxxxxxxxxxxxx.mailgun.org"
@@ -19,10 +19,10 @@ dotnet user-secrets set MailgunApiKey "key-xxxxxxxxxxxxxxxxxxxxx"
 
 Docker
 ------
-If you need create docker image - use this script
+If you need create docker image - use this script:
 
-### Attantion
-This script stop and remove all containers
+>### Attantion
+>This script stop and remove all containers
 
 ```Shell
 dotnet restore
@@ -37,7 +37,7 @@ docker run -d -p 80:5000 blogapp
 
 Basic usage
 -----------
-Copy application in server. Run this commands in application folder
+Copy application in server. Run this commands in application folder:
 
 ```Shell
 dotnet restore
